@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+#VS Code json settings
+/"Active Code"/".vscode"
+/Past/".vscode"
