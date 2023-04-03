@@ -32,5 +32,5 @@
 *.app
 
 #VS Code json settings
-/"Active Code"/".vscode"
-/Past/".vscode"
+./"Active Code"/.vscode
+./Past/.vscode
