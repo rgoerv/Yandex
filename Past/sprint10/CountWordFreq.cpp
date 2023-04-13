@@ -27,18 +27,27 @@ vector<pair<string, int>> GetSortedWordCounts(vector<string> words) {
 int main() {
     vector<string> words;
     string word;
+    
+    string PATH("C:\\Programs\\Yandex\\Active Code\\canterbury.txt"s);
 
-    ifstream filestream("canterbury.txt");
+    ifstream file;
 
-    if (!filestream.is_open())
-        std::cout << "failed to open " << "canterbury.txt" << '\n';
-    else 
-        std::cout << "open " << "canterbury.txt" << '\n';
+    try
+    {
+        file.open(PATH);
 
-    while (!filestream.eof()) {
-        filestream >> word;
-        cout << word << flush;
-        word.size() == 5 ? (void)words.push_back(word) : (void)0;
+        if (!file.is_open())
+            std::cout << "failed to open " << PATH << '\n';
+        else 
+            std::cout << "open " << PATH << '\n';
+
+        while (file >> word) {
+            word == "which"s ? (void)words.push_back(word) : (void)0;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
     }
 
     auto counts_vector = GetSortedWordCounts(move(words));
