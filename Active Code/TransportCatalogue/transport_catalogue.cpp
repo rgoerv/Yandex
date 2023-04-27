@@ -8,9 +8,9 @@
 
 namespace Catalogue {
 
-void TransportCatalogue::AddStop(string name, Coordinates locate)
+void TransportCatalogue::AddStop(string name, double lat, double lng)
 {
-    stops_.push_back(Stop { name, locate });
+    stops_.push_back(Stop { name, lat, lng });
     stopname_to_stop_.insert({ stops_.back().name_, &stops_.back() });
 }
 
@@ -38,7 +38,7 @@ const Bus* TransportCatalogue::FindBus(string_view name) const
 
 const Bus* TransportCatalogue::GetBusInfo(string_view name)
 {
-
+    return busname_to_bus_.at(name);
 }
 
 } // namespace TransportCatalogue

@@ -12,14 +12,6 @@ namespace output {
 using std::string;
 using std::istream;
 using std::vector;
-
 using namespace input;
-
-void release_output(istream& input, Reader& reader)
-{
-    size_t size = 0;
-    input >> size;
-
-}
-
+void release_output(istream& input, Reader& reader);
 } // namespace output

@@ -39,8 +39,10 @@ public:
     Reader(size_t size);
 
     istream& GetInput(istream& input);
-
     void FillCatalogue();
+
+    const TransportCatalogue& GetCatalogue();
+
 private:
     vector<string> input_queries_;
     vector<size_t> bus_queries_;

@@ -6,4 +6,5 @@
 int main() 
 {
     Read();
+    system("pause");
 }

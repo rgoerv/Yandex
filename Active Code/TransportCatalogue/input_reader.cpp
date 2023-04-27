@@ -1,5 +1,3 @@
-#pragma once
-
 #include "input_reader.h"
 #include "geo.h"
 #include "stat_reader.h"
@@ -20,7 +18,7 @@ void Read()
     std::ifstream file("input.txt");
     auto [input, reader] = fill_input(file);
     output::release_output(input, reader);
-    // output::release_output(input::fill_input(std::cin));
+    //output::release_output(input, reader);
 }
 
 namespace input {
@@ -100,14 +98,20 @@ void Reader::FillCatalogue()
     }
 }
 
+const TransportCatalogue& Reader::GetCatalogue()
+{
+    return catalogue;
+}
+
 void Reader::AddStop(string_view query_line)
 {
     vector<string_view> query(SplitIntoWords(query_line));
     query[1].remove_suffix(1);
     query[2].remove_suffix(1);
-    Coordinates coordinates(std::stod(static_cast<string>(query[2])),
-        std::stod(static_cast<string>(query[3])));
-    catalogue.AddStop(std::move(static_cast<string>(query[1])), coordinates);
+    double lat = std::stod(static_cast<string>(query[2]));
+    double lng = std::stod(static_cast<string>(query[3]));
+        
+    catalogue.AddStop(std::move(static_cast<string>(query[1])), lat, lng);
 }
 
 void Reader::AddBus(string_view query_line)
@@ -123,7 +127,7 @@ void Reader::AddBus(string_view query_line)
 
     vector<string_view> stops(SplitIntoStops(query_line, delim));
     vector<string_view> full_route(stops);
-                                            // ���������� �����, �� �������������
+
     if (delim == '-') 
     {
         full_route.reserve(2 * stops.size());
