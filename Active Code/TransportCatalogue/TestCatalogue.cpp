@@ -16,12 +16,12 @@ namespace test {
 void Test1()
 {
     using namespace input;
-    std::ifstream file_input("C://Programs//Yandex//Active Code//TransportCatalogue//txts//tsB_case1_input.txt");
+    std::ifstream file_input("C://Programs//Yandex//Active Code//TransportCatalogue//txts//tsC_case1_input.txt");
     Reader reader;
     istream& input = fill_input(file_input, reader);
     output::release_output(input, reader.GetCatalogue());
 
-    std::ifstream file_output("C://Programs//Yandex//Active Code//TransportCatalogue//txts//tsB_case1_output.txt");
+    std::ifstream file_output("C://Programs//Yandex//Active Code//TransportCatalogue//txts//tsC_case1_output1.txt");
     if (!file_output.is_open())
     {
         throw;
@@ -43,6 +43,7 @@ void Test1()
     file_result.close();
 }
 
+/*
 void Test2()
 {
     using namespace input;
@@ -70,5 +71,6 @@ void Test2()
     file_input.close();
     file_result.close();
 }
+*/
 
 } // namespace test

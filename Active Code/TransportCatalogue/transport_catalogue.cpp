@@ -74,4 +74,9 @@ const set<string_view>& TransportCatalogue::GetBusesInStop(string_view stopname)
     return empty;
 }
 
+void TransportCatalogue::AddDistance(string_view stop_x, string_view stop_y, double distance)
+{
+    dist_btn_stops_[{ FindStop(stop_x), FindStop(stop_y) }] = distance;
+}
+
 } // namespace TransportCatalogue

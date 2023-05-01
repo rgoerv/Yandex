@@ -20,6 +20,7 @@ using std::vector;
 using std::deque;
 using std::unordered_map;
 using std::set;
+using std::pair;
 
 struct Stop {
     string name_; // название остановки
@@ -46,6 +47,15 @@ struct Bus {
     bool CheckStop(const Stop* stop) const;
 };
 
+struct HacherPair
+{
+    size_t operator()(const pair<const Stop*, const Stop*>& stops) const
+    {
+        return std::hash<const void*> {}(stops.first)
+            + std::hash<const void*> {}(stops.second) * 37;
+    }
+};
+
 class TransportCatalogue {
 public:
     void AddStop(string name, double lat, double lng);
@@ -55,6 +65,7 @@ public:
     std::tuple<bool, int64_t, int64_t, double> GetBusInfo(string_view name) const;
     bool CheckStop(string_view name) const;
     const set<string_view>& GetBusesInStop(string_view stopname) const;
+    void AddDistance(string_view stop_x, string_view stop_y, double distance);
 
 private:
     deque<Stop> stops_;
@@ -65,7 +76,7 @@ private:
     // 
     unordered_map<const Stop*, set<string_view>> stop_to_buses_; 
     // расстояние между двумя остановками
-    // std::unordered_map<std::pair<const Stop*, const Stop*>, double> dist_btn_stops_;
+    unordered_map<pair<const Stop*, const Stop*>, double, HacherPair> dist_btn_stops_;
 };
 
 } // namespace Catalogue

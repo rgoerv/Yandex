@@ -43,6 +43,7 @@ public:
 
 private:
     vector<string> input_queries_;
+    unordered_map<string_view, string_view> stop_to_distance_queries_;
     vector<size_t> bus_queries_;
     TransportCatalogue catalogue;
 

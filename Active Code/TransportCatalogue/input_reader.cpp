@@ -22,6 +22,7 @@ using std::istream;
 using std::string;
 using std::string_view;
 using std::vector;
+using std::pair;
 
 using namespace std::string_literals;
 using namespace Catalogue;
@@ -29,20 +30,49 @@ using namespace Catalogue;
 namespace Spliting 
 {
 
+vector<pair<double, string_view>> SplitIntoDistStop(string_view line)
+{
+    vector<pair<double, string_view>> result;
+    size_t comma = line.find(',');
+
+    // 5600m to Rossoshanskaya ulitsa
+    while (comma != line.npos)
+    {
+        size_t m = line.find('m');
+        size_t stop_begin = m + 5;
+        result.push_back({ std::stod(static_cast<string>(line.substr(0, m))), 
+                            line.substr(stop_begin, comma) });
+        line.remove_prefix(comma + 2);
+    }
+    size_t m = line.find('m');
+    if (m != line.npos)
+    {
+        size_t stop_begin = m + 5;
+        result.push_back({ std::stod(static_cast<string>(line.substr(0, m))),
+            line.substr(stop_begin, comma) });
+    }
+
+    return result;
+}
+
 vector<string_view> SplitStop(string_view str)
 {
     vector<string_view> result;
 
     str.remove_prefix(5);
     size_t name_end = str.find(':');
-    result.push_back(str.substr(0, name_end));
+    result.push_back(str.substr(0, name_end)); // stopname 0
 
     str.remove_prefix(name_end + 2);
-    size_t lat_end = str.find(',');
-    result.push_back(str.substr(0, lat_end));
+    size_t comma = str.find(',');
+    result.push_back(str.substr(0, comma)); // latitude 1
 
-    str.remove_prefix(lat_end + 2);
-    result.push_back(str.substr(0, str.find_last_not_of(' ') + 1));
+    str.remove_prefix(comma + 2);
+    comma = str.find(',');
+    result.push_back(str.substr(0, comma)); // longitude 2
+
+    str.remove_prefix(comma + 2);
+    result.push_back(str.substr(0, str.npos)); // distance"m to "stopname
 
     return result;
 }
@@ -100,6 +130,14 @@ void Reader::FillCatalogue()
         (*it).substr(0, 4) == "Stop"s ? AddStop(*it) : bus_queries_.push_back(i);
     }
 
+    for (const auto& [stop, qline] : stop_to_distance_queries_) {
+        auto distances_to_stops = Spliting::SplitIntoDistStop(qline);
+        for (const auto& [distance, stopline] : distances_to_stops)
+        {
+            catalogue.AddDistance(stop, stopline, distance);
+        }
+    }
+
     for (const auto index : bus_queries_) {
         AddBus(input_queries_[index]);
     }
@@ -117,6 +155,7 @@ void Reader::AddStop(string_view query_line)
     double lat = std::stod(static_cast<string>(query[1]));
     double lng = std::stod(static_cast<string>(query[2]));
     string stop_name = static_cast<string>(query[0]);
+    stop_to_distance_queries_.insert({ query[0], query[3] });
      
     catalogue.AddStop(std::move(stop_name), lat, lng);
 }

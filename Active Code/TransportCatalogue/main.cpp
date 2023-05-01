@@ -3,8 +3,7 @@
 
 int main() 
 {
-    using namespace test;
-    Test1();
-    Test2();
+    // using namespace test;
+    // Test1();
     Read();
 }
