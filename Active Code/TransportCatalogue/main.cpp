@@ -1,10 +1,10 @@
 #include "input_reader.h"
-
-#include <fstream>
-#include <iostream>
+#include "TestCatalogue.h"
 
 int main() 
 {
+    using namespace test;
+    Test1();
+    Test2();
     Read();
-    system("pause");
 }

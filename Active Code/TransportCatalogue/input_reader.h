@@ -13,14 +13,14 @@ class Reader;
 #include <string_view>
 #include <tuple>
 
-//
+// 
 #include <fstream>
 
 void Read();
 
 namespace input {
 
-class Reader;
+// class Reader;
 
 using std::istream;
 using std::string;
@@ -30,18 +30,16 @@ using std::vector;
 using namespace std::string_literals;
 using namespace Catalogue;
 
-std::tuple<istream&, Reader&> fill_input(istream& input);
-vector<string_view> SplitIntoWords(string_view str);
-vector<string_view> SplitIntoStops(string_view line, const char delim);
+istream& fill_input(istream& input, Reader& reader);
 
 class Reader {
 public:
-    Reader(size_t size);
+    void Reserve(size_t size);
 
     istream& GetInput(istream& input);
     void FillCatalogue();
 
-    const TransportCatalogue& GetCatalogue();
+    TransportCatalogue& GetCatalogue();
 
 private:
     vector<string> input_queries_;

@@ -9,9 +9,11 @@
 
 namespace output {
 
-using std::string;
 using std::istream;
-using std::vector;
+using std::string_view;
 using namespace input;
-void release_output(istream& input, Reader& reader);
+using namespace Catalogue;
+void PrintBus(string_view bus, const TransportCatalogue& catalogue);
+void PrintBusesInStop(string_view stop, const TransportCatalogue& catalogue);
+void release_output(istream& input, const TransportCatalogue& catalogue);
 } // namespace output

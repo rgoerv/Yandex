@@ -8,17 +8,12 @@
 #include <string_view>
 #include <tuple>
 
-//
-#include <fstream>
-
 void Read()
 {
     using namespace input;
-
-    std::ifstream file("input.txt");
-    auto [input, reader] = fill_input(file);
-    output::release_output(input, reader);
-    //output::release_output(input, reader);
+    Reader reader;
+    istream& input = fill_input(std::cin, reader);
+    output::release_output(input, reader.GetCatalogue());
 }
 
 namespace input {
@@ -31,32 +26,28 @@ using std::vector;
 using namespace std::string_literals;
 using namespace Catalogue;
 
-std::tuple<istream&, Reader&> fill_input(istream& input)
+namespace Spliting 
 {
-    size_t size = 0;
-    input >> size;
-    Reader reader(size);
 
-    return { reader.GetInput(input), reader };
-}
-
-vector<string_view> SplitIntoWords(string_view str)
+vector<string_view> SplitStop(string_view str)
 {
     vector<string_view> result;
 
-    size_t space = str.find_first_not_of(' ');
-    size_t after_space = str.find_first_of(' ', space);
+    str.remove_prefix(5);
+    size_t name_end = str.find(':');
+    result.push_back(str.substr(0, name_end));
 
-    while (space != str.npos) {
-        result.push_back(std::move(str.substr(space, after_space - space)));
-        str.remove_prefix(std::min(str.size(), after_space));
-        space = str.find_first_not_of(' ');
-        after_space = str.find_first_of(' ', space);
-    }
+    str.remove_prefix(name_end + 2);
+    size_t lat_end = str.find(',');
+    result.push_back(str.substr(0, lat_end));
+
+    str.remove_prefix(lat_end + 2);
+    result.push_back(str.substr(0, str.find_last_not_of(' ') + 1));
+
     return result;
 }
 
-vector<string_view> SplitIntoStops(string_view line, const char delim)
+vector<string_view> SplitBus(string_view line, const char delim)
 {
     vector<string_view> result;
     size_t stopname_end = line.find(delim);
@@ -71,7 +62,21 @@ vector<string_view> SplitIntoStops(string_view line, const char delim)
     return result;
 }
 
-Reader::Reader(size_t size)
+} // namespace Spliting
+
+istream& fill_input(istream& input, Reader& reader)
+{
+    size_t size = 0;
+    input >> size;
+    input.ignore();
+    
+    reader.Reserve(size);
+    istream& out_input = reader.GetInput(input);
+
+    return out_input;
+}
+
+void Reader::Reserve(size_t size)
 {
     input_queries_.reserve(size);
 }
@@ -79,9 +84,11 @@ Reader::Reader(size_t size)
 istream& Reader::GetInput(istream& input)
 {
     string line;
-    for (auto i = 0; i < 10 && getline(input, line); ++i) {
-        input_queries_.push_back(std::move(line));
+    
+    for (auto i = 0; i < input_queries_.capacity() && getline(input, line); ++i) {
+        input_queries_.push_back(line);
     }
+
     FillCatalogue();
     return input;
 }
@@ -90,7 +97,7 @@ void Reader::FillCatalogue()
 {
     size_t i = 0;
     for (auto it = input_queries_.begin(); it != input_queries_.end(); ++it, ++i) {
-        (*it).substr(0, 4) == "Stop"s ? AddStop(*it) : bus_queries_.push_back(i); // check 3 or 4
+        (*it).substr(0, 4) == "Stop"s ? AddStop(*it) : bus_queries_.push_back(i);
     }
 
     for (const auto index : bus_queries_) {
@@ -98,20 +105,20 @@ void Reader::FillCatalogue()
     }
 }
 
-const TransportCatalogue& Reader::GetCatalogue()
+TransportCatalogue& Reader::GetCatalogue()
 {
     return catalogue;
 }
 
 void Reader::AddStop(string_view query_line)
 {
-    vector<string_view> query(SplitIntoWords(query_line));
-    query[1].remove_suffix(1);
-    query[2].remove_suffix(1);
-    double lat = std::stod(static_cast<string>(query[2]));
-    double lng = std::stod(static_cast<string>(query[3]));
-        
-    catalogue.AddStop(std::move(static_cast<string>(query[1])), lat, lng);
+    vector<string_view> query(Spliting::SplitStop(query_line));
+
+    double lat = std::stod(static_cast<string>(query[1]));
+    double lng = std::stod(static_cast<string>(query[2]));
+    string stop_name = static_cast<string>(query[0]);
+     
+    catalogue.AddStop(std::move(stop_name), lat, lng);
 }
 
 void Reader::AddBus(string_view query_line)
@@ -125,13 +132,13 @@ void Reader::AddBus(string_view query_line)
     query_line.remove_prefix(pos_2point + 2);
     const char delim = query_line.find('>') == npos ? '-' : '>';
 
-    vector<string_view> stops(SplitIntoStops(query_line, delim));
+    vector<string_view> stops(Spliting::SplitBus(query_line, delim));
     vector<string_view> full_route(stops);
 
-    if (delim == '-') 
+    if (delim == '-')
     {
         full_route.reserve(2 * stops.size());
-        for (size_t i = stops.size() - 2; i != 0; --i) {
+        for (int64_t i = stops.size() - 2; i > -1; --i) {
             full_route.push_back(stops[i]);
         }
     }
@@ -139,9 +146,19 @@ void Reader::AddBus(string_view query_line)
     vector<const Stop*> result;
     result.reserve(full_route.size());
 
+    double length = .0;
+    Coordinates first = catalogue.FindStop(full_route[0])->coordinates;
+    Coordinates last;
+
     for (const auto& stop : full_route) {
-        result.push_back(catalogue.FindStop(stop));
+        last = catalogue.FindStop(stop)->coordinates;
+        length += ComputeDistance(first, last);
+        first = last;
+
+        result.push_back(catalogue.FindStop(stop));       
     }
+
+    catalogue.AddBus(name, result, length);
 }
 
 } // namespace input
