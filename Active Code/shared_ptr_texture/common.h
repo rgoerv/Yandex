@@ -28,7 +28,8 @@ inline Size GetImageSize(const Image& image) {
 // Проверяет, содержится ли заданная точка в эллипсе заданного размера
 // Считается, что эллипс вписан в прямоугольник с вершинами в точках (0, 0) и
 // (size.width, size.height)
-inline bool IsPointInEllipse(Point p, Size size) {
+inline bool IsPointInEllipse(Point p, Size size) 
+{
     // Нормируем координаты точки в диапазон (-1, 1)
     // Сдвиг на 0.5 нужен, чтобы считать расстояние до центра пикселя, так
     // получается более красивая форма
@@ -36,4 +37,9 @@ inline bool IsPointInEllipse(Point p, Size size) {
     double y = (p.y + 0.5) / (size.height / 2.0) - 1;
     // Проверяем, лежит ли точка в единичном круге
     return x * x + y * y <= 1;
+}
+
+inline bool IsPointInRectangle(Point p, Size size)
+{
+    return (p.x >= 0 && p.y >= 0) && (p.x <= size.width && p.y <= size.height);
 }

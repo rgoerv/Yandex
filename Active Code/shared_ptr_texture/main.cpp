@@ -100,29 +100,73 @@ void TestCow() {
     assert(answer == output.str());
 }
 
+void BigDraw()
+{
+    Canvas canvas({ 3000, 2000 });
+
+    canvas.AddShape(ShapeType::RECTANGLE, { 100, 100 }, { 4000, 20 },
+        MakeTextureSolid({ 3, 1000 }, '*'));
+
+    canvas.AddShape(ShapeType::ELLIPSE, { 50, 50 }, { 30, 900 },
+        MakeTextureSolid({ 100, 100 }, '&'));
+
+    std::stringstream output;
+    canvas.Print(output);
+
+    std::string answer;
+    answer.reserve(3002 * 2003);
+
+    for (int i = 0; i < 3002; ++i) {
+        answer.push_back('#');
+    }
+    answer.push_back('\n');
+
+    for (int i = 0; i < 2000; ++i) {
+        answer.push_back('#');
+        for (int j = 0; j < 3000; ++j) {
+            if (IsPointInEllipse({ j - 50, i - 50 }, { 30, 900 })) {
+                if (i < 150) {
+                    answer.push_back('&');
+                } else {
+                    answer.push_back('.');
+                }
+            } else if (i >= 100 && j >= 100 && j < 4100 && i < 120) {
+                if (j < 103) {
+                    answer.push_back('*');
+                } else {
+                    answer.push_back('.');
+                }
+            } else {
+                answer.push_back(' ');
+            }
+        }
+        answer.push_back('#');
+        answer.push_back('\n');
+    }
+
+    for (int i = 0; i < 3002; ++i) {
+        answer.push_back('#');
+    }
+    answer.push_back('\n');
+
+    assert(answer == output.str());
+}
+
+
 int main() {
-    Canvas canvas{{18, 5}};
+    BigDraw();
+    TestCow();
+    TestCpp();
 
-    canvas.AddShape(ShapeType::RECTANGLE, {1, 0}, {16, 5}, MakeTextureCow());
+    Canvas canvas({ 30, 20 });
 
-    // std::stringstream output;
+    canvas.AddShape(ShapeType::RECTANGLE, { 10, 10 }, { 40, 2 },
+        MakeTextureSolid({ 3, 1000 }, '*'));
+
+    canvas.AddShape(ShapeType::ELLIPSE, { 5, 5 }, { 3, 90 },
+        MakeTextureSolid({ 100, 100 }, '&'));
+    
     canvas.Print(std::cout);
-
-    // clang-format off
-    // Здесь уместно использовать сырые литералы, т.к. в текстуре есть символы '\'
-    const auto answer =
-        R"(####################)""\n"
-        R"(# ^__^             #)""\n"
-        R"(# (oo)\_______     #)""\n"
-        R"(# (__)\       )\/\ #)""\n"
-        R"(#     ||----w |    #)""\n"
-        R"(#     ||     ||    #)""\n"
-        R"(####################)""\n";
-    // clang-format on
-
-    // assert(answer == output.str());
-    // TestCow();
-    // TestCpp();
 
     system("pause");
 }

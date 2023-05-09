@@ -12,7 +12,7 @@ public:
     }
 
     char GetPixelColor(Point p) const {        
-        return image_[p.y][p.x];
+        return image_[p.x][p.y];
     }
 
 private:
