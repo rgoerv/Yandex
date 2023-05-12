@@ -158,4 +158,5 @@ int main() {
     for (auto& person : people) {
         person->SetObserver(nullptr);
     }
+    system("pause");
 }

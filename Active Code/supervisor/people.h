@@ -55,7 +55,7 @@ public:
     virtual void Dance() {
         ++dance_count_;
         ++satisfaction_;
-        if(observer_) {
+        if (observer_) {
             observer_->OnSatisfactionChanged(*this, satisfaction_ - 1, satisfaction_);
         }
     }
@@ -68,33 +68,25 @@ public:
     virtual void LiveADay() {
     }
 
-    void ChangeSatisfaction(int count) {
-        satisfaction_ += count;
-    }
-
-    void ChangeDanceCount(int count) {
-        dance_count_ += count;
-    }
-
     PersonObserver* GetObserver() {
         return observer_;
     }
 
-    virtual ~Person() {
-        
+    virtual ~Person() {  
     }
-
+    
+protected:
+    int satisfaction_ = 100;
+    int dance_count_ = 0;
 private:
     std::string name_;
     PersonObserver* observer_ = nullptr;
-    int satisfaction_ = 100;
     int age_;
-    int dance_count_ = 0;
 };
 
 // Рабочий.
 // День рабочего проходит за работой
-class Worker final : public Person {
+class Worker : public Person {
 public:
     Worker(const std::string& name, int age) 
         : Person(name, age)
@@ -104,10 +96,10 @@ public:
     // Рабочий старше 30 лет и младше 40 за танец получает 2 единицы удовлетворённости вместо 1
     void Dance() override {
         if (const int age = GetAge(); age > 30 && age < 40) {
-            ChangeSatisfaction(+2);
-            ChangeDanceCount(+1);
-            if(GetObserver()) {
-                GetObserver()->OnSatisfactionChanged(*this, GetSatisfaction() - 2, GetSatisfaction());
+            satisfaction_+=2;
+            ++dance_count_;
+            if (GetObserver()) {
+                GetObserver()->OnSatisfactionChanged(*this, satisfaction_ - 2, satisfaction_);
             }
         }
         else {
@@ -123,9 +115,9 @@ public:
     // Увеличивает счётчик сделанной работы на 1, уменьшает удовлетворённость на 5
     void Work() {
         ++work_count_;
-        ChangeSatisfaction(-5);
+        satisfaction_ -= 5;
         if(GetObserver()) {
-            GetObserver()->OnSatisfactionChanged(*this, GetSatisfaction() + 5, GetSatisfaction());
+            GetObserver()->OnSatisfactionChanged(*this, satisfaction_ + 5, satisfaction_);
         }
     }
 
@@ -139,7 +131,7 @@ private:
 
 // Студент.
 // День студента проходит за учёбой
-class Student final : public Person {
+class Student : public Person {
 public:
     Student(const std::string& name, int age) 
         : Person(name, age)
@@ -153,9 +145,9 @@ public:
     // Учёба увеличивает уровень знаний на 1, уменьшает уровень удовлетворённости на 3
     void Study() {
         ++knowledge_level_;
-        ChangeSatisfaction(-3);
+        satisfaction_ -= 3;
         if(GetObserver()) {
-            GetObserver()->OnSatisfactionChanged(*this, GetSatisfaction() + 3, GetSatisfaction());
+            GetObserver()->OnSatisfactionChanged(*this, satisfaction_ + 3, satisfaction_);
         }
     }
 

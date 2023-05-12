@@ -19,11 +19,9 @@ public:
         }
 
     void OnSatisfactionChanged(Person& person, int old_value, int new_value) override {
-        (void)old_value;
-        if(new_value < min_satisfaction_) {
-            for( ; person.GetSatisfaction() <= max_satisfaction_;) {
-                person.ChangeDanceCount(+1);
-                person.ChangeSatisfaction(+1);
+        if(new_value < old_value && new_value < min_satisfaction_) {
+            while(person.GetSatisfaction() < max_satisfaction_) {
+                person.Dance();
             }
         }
     }
