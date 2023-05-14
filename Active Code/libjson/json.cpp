@@ -70,24 +70,80 @@ Node LoadNode(istream& input) {
 
 }  // namespace
 
+
+bool Node::IsInt() const {
+
+}
+
+bool Node::IsDouble() const {
+
+}
+
+bool Node::IsPureDouble() const {
+
+}
+
+bool Node::IsBool() const {
+
+}
+
+bool Node::IsString() const {
+
+}
+
+bool Node::IsNull() const {
+
+}
+
+bool Node::IsArray() const {
+
+}
+
+bool Node::IsMap() const {
+
+}
+
+
+Node::Node()
+    : value_(nullptr) 
+{
+}
+
 Node::Node(Array array)
-    : as_array_(move(array)) {
+    : value_(move(array)) 
+{
 }
 
 Node::Node(Dict map)
-    : as_map_(move(map)) {
+    : value_(move(map)) 
+{
+}
+
+Node::Node(bool value)
+    : value_(value)
+{
 }
 
 Node::Node(int value)
-    : as_int_(value) {
+    : value_(value) 
+{
+}
+
+Node::Node(double value)
+    : value_(value)
+{
 }
 
 Node::Node(string value)
-    : as_string_(move(value)) {
+    : value_(move(value)) 
+{
 }
 
+
+
 const Array& Node::AsArray() const {
-    return as_array_;
+if (const )
+    return std::visit(json::ValueGetter {}, value_);
 }
 
 const Dict& Node::AsMap() const {
@@ -101,6 +157,15 @@ int Node::AsInt() const {
 const string& Node::AsString() const {
     return as_string_;
 }
+
+bool Node::AsBool() const {
+
+}
+double Node::AsDouble() const {
+
+}
+
+
 
 Document::Document(Node root)
     : root_(move(root)) {

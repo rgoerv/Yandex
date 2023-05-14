@@ -14,7 +14,7 @@ namespace {
 // Можете воспользоваться ими, чтобы протестировать свой код.
 // Раскомментируйте их по мере работы.
 
-/*
+
 json::Document LoadJSON(const std::string& s) {
     std::istringstream strm(s);
     return json::Load(strm);
@@ -250,12 +250,11 @@ void Benchmark() {
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() << "ms"sv
               << std::endl;
 }
-*/
+
 
 }  // namespace
 
 int main() {
-/*
     TestNull();
     TestNumbers();
     TestStrings();
@@ -264,5 +263,4 @@ int main() {
     TestMap();
     TestErrorHandling();
     Benchmark();
-*/
 }
