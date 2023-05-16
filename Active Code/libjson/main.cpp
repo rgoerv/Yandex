@@ -230,8 +230,8 @@ void TestErrorHandling() {
 void Benchmark() {
     const auto start = std::chrono::steady_clock::now();
     Array arr;
-    arr.reserve(1'000);
-    for (int i = 0; i < 1'000; ++i) {
+    arr.reserve(1'0);
+    for (int i = 0; i < 1'0; ++i) {
         arr.emplace_back(Dict{
             {"int"s, 42},
             {"double"s, 42.1},
@@ -243,6 +243,7 @@ void Benchmark() {
         });
     }
     std::stringstream strm;
+    // // json::Print(Document{arr}, std::cout);
     json::Print(Document{arr}, strm);
     const auto doc = json::Load(strm);
     assert(doc.GetRoot() == arr);
@@ -263,4 +264,18 @@ int main() {
     TestMap();
     TestErrorHandling();
     Benchmark();
+
+    using namespace std;
+    
+    Node arr1(LoadJSON("[1,1.0,true,\"1\",[]]"s).GetRoot());
+    Print(Document{arr1}, cout);
+    cout << "\n-------------------------------------------------------------\n"s;
+    Node arr2(LoadJSON("{\"10\":10,\"1.0\":1.0,\"true\":true,\"string\":\"string\",\"[]\":[]}"s).GetRoot());
+    Print(Document{arr2}, cout);
+    cout << "\n-------------------------------------------------------------\n"s;
+    Node arr3(LoadJSON("{\"configurations\": [{\"name\": \"Win32\",\"includePath\": [\"${workspaceFolder}/**\"],\"defines\": [\"_DEBUG\",\"UNICODE\",\"_UNICODE\"],\"windowsSdkVersion\": \"10.0.22000.0\",\"compilerPath\": \"C:/msys64/mingw64/bin/g++.exe\",\"cStandard\": \"c17\",\"cppStandard\": \"c++23\",\"intelliSenseMode\": \"gcc-x64\"}],\"version\": 4}"s).GetRoot());
+    Print(Document{arr3}, cout);
+    cout << "\n-------------------------------------------------------------\n"s;
+
+    system("pause");
 }

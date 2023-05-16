@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 #include <variant>
+#include <optional>
+#include <cassert>
 
 namespace json {
 
@@ -19,68 +21,30 @@ public:
     using runtime_error::runtime_error;
 };
 
-struct ValueGetter {
-    std::nullptr_t operator()(std::nullptr_t) const {
-        return nullptr;
-    }
-    const Array& operator()(const Array& array) const {
-        return array;
-    }
-    const Dict& operator()(const Dict& map) const {
-        return map;
-    }
-    bool operator()(bool value) const {
-        return value;
-    }
-    int operator()(int value) const {
-        return value;
-    }
-    double operator()(double value) const {
-        return value;
-    }
-    const std::string& operator()(const std::string& value) const {
-        return value;
-    }
+// Контекст вывода, хранит ссылку на поток вывода и текущий отсуп
+struct PrintContext {
+    std::ostream& out;
+    int indent_step = 4;
+    int indent = 0;
+
+    void PrintIndent() const;
+
+    // Возвращает новый контекст вывода с увеличенным смещением
+    PrintContext Indented() const;
 };
-
-
-struct ValueChecker {
-    bool operator()(std::nullptr_t) const {
-        return true;
-    }
-    bool operator()(const Array& array) const {
-        return true;
-    }
-    bool operator()(const Dict& map) const {
-        return true;
-    }
-    bool operator()(bool value) const {
-        return true;
-    }
-    bool operator()(int value) const {
-        return true;
-    }
-    bool operator()(double value) const {
-        return true;
-    }
-    bool operator()(const std::string& value) const {
-        return true;
-    }
-};
-
-
 
 class Node {
 public:
     using Value = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
 
-    explicit Node();
-    explicit Node(Array array);
-    explicit Node(Dict map);
-    explicit Node(bool value);
-    explicit Node(int value);
-    explicit Node(double value);
-    explicit Node(std::string value);
+    Node();
+    Node(std::nullptr_t);
+    Node(Array array);
+    Node(Dict map);
+    Node(bool value);
+    Node(int value);
+    Node(double value);
+    Node(std::string value);
 
     bool IsInt() const;
     bool IsDouble() const;
@@ -103,7 +67,35 @@ public:
 
 private:
     Value value_;
+
+    template<class Type>
+    const Type& As() const {
+        using namespace std::string_literals;
+        if (const auto* value = std::get_if<Type>(&value_)) {
+            assert(value != nullptr);
+            return *value;
+        }
+        throw std::logic_error("inside contains another type value or nullptr"s);
+    }
+
+    template<class Type>
+    bool Is() const {
+        using namespace std::string_literals;
+        if (const auto* value = std::get_if<Type>(&value_)) {
+            assert(value != nullptr);
+            return true;
+        }
+        return false;
+    }
 };
+
+inline bool operator==(const Node& lhs, const Node& rhs) {
+    return lhs.GetValue() == rhs.GetValue();
+}
+
+inline bool operator!=(const Node& lhs, const Node& rhs) {
+    return lhs.GetValue() != rhs.GetValue();
+}
 
 class Document {
 public:
@@ -117,6 +109,14 @@ private:
 
 Document Load(std::istream& input);
 
-void Print(const Document& doc, std::ostream& output);
+inline bool operator==(const Document& lhs, const Document& rhs) {
+    return lhs.GetRoot().GetValue() == rhs.GetRoot().GetValue();
+}
 
+inline bool operator!=(const Document& lhs, const Document& rhs) {
+    return lhs.GetRoot().GetValue() != rhs.GetRoot().GetValue();
+}
+
+void Print(const Document& doc, std::ostream& output);
+void PrintNode(const Node& node, const PrintContext& ctx);
 }  // namespace json
