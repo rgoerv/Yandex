@@ -7,6 +7,8 @@
 #include <variant>
 #include <optional>
 #include <cassert>
+#include <type_traits>
+#include <iterator>
 
 namespace json {
 
@@ -48,7 +50,6 @@ public:
     bool IsNull() const;
     bool IsArray() const;
     bool IsMap() const;
-
 
     int AsInt() const;
     bool AsBool() const;

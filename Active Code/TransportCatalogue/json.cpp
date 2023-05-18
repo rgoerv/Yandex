@@ -180,7 +180,7 @@ Node LoadBool(std::istream& input) {
     std::string word = "";
     int i = 0;
     char c;
-    for (; input >> c && i < 4; ++i) {
+    for (; i < 4 && input >> c; ++i) {
         word += c;
     }
     
@@ -285,7 +285,7 @@ const Dict& Node::AsMap() const {
 int Node::AsInt() const {
     return As<int>();
 }
-const std::string& Node::AsString() const {
+ const std::string& Node::AsString() const {
     return As<std::string>();
 }
 bool Node::AsBool() const {

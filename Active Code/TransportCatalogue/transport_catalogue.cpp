@@ -1,4 +1,5 @@
 #include "transport_catalogue.h"
+#include "domain.h"
 
 #include <string>
 #include <string_view>
@@ -11,11 +12,6 @@
 #include <iostream>
 
 namespace Catalogue {
-
-bool Bus::CheckStop(const Stop* stop) const
-{
-    return std::count(route_.begin(), route_.end(), stop) > 0;
-}
 
 void TransportCatalogue::AddStop(const std::string& name, double lat, double lng)
 {
@@ -53,6 +49,15 @@ const Bus* TransportCatalogue::FindBus(std::string_view name) const
     return busname_to_bus_.at(name);
 }
 
+const std::unordered_map<std::string_view, const Bus*>& TransportCatalogue::GetBusNameToBus() const {
+    return busname_to_bus_;
+}
+
+const std::unordered_map<const Stop*, std::set<std::string_view>>& TransportCatalogue::GetStopToBuses() const {
+    return stop_to_buses_;
+}
+
+
 const BusInfo TransportCatalogue::GetBusInfo(std::string_view name) const
 {
     if (!busname_to_bus_.count(name)) {
@@ -79,7 +84,7 @@ void TransportCatalogue::AddDistance(std::string_view stop_x, std::string_view s
     dist_btn_stops_[{ FindStop(stop_x), FindStop(stop_y) }] = distance;
 }
 
-const int64_t TransportCatalogue::GetDistance(const Stop* from, const Stop* to) const
+int64_t TransportCatalogue::GetDistance(const Stop* from, const Stop* to) const
 {
     // i want .contains(key) from c++20
     return dist_btn_stops_.count({ from, to }) > 0 ? dist_btn_stops_.at({ from, to }) : 0;

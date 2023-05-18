@@ -1,0 +1,103 @@
+{
+    "base_requests": [
+      {
+        "type": "Bus",
+        "name": "14",
+        "stops": [
+          "Ulitsa Lizy Chaikinoi",
+          "Elektroseti",
+          "Ulitsa Dokuchaeva",
+          "Ulitsa Lizy Chaikinoi"
+        ],
+        "is_roundtrip": true
+      },
+      {
+        "type": "Bus",
+        "name": "114",
+        "stops": [
+          "Morskoy vokzal",
+          "Rivierskiy most"
+        ],
+        "is_roundtrip": false
+      },
+      {
+        "type": "Stop",
+        "name": "Rivierskiy most",
+        "latitude": 43.587795,
+        "longitude": 39.716901,
+        "road_distances": {
+          "Morskoy vokzal": 850
+        }
+      },
+      {
+        "type": "Stop",
+        "name": "Morskoy vokzal",
+        "latitude": 43.581969,
+        "longitude": 39.719848,
+        "road_distances": {
+          "Rivierskiy most": 850
+        }
+      },
+      {
+        "type": "Stop",
+        "name": "Elektroseti",
+        "latitude": 43.598701,
+        "longitude": 39.730623,
+        "road_distances": {
+          "Ulitsa Dokuchaeva": 3000,
+          "Ulitsa Lizy Chaikinoi": 4300
+        }
+      },
+      {
+        "type": "Stop",
+        "name": "Ulitsa Dokuchaeva",
+        "latitude": 43.585586,
+        "longitude": 39.733879,
+        "road_distances": {
+          "Ulitsa Lizy Chaikinoi": 2000,
+          "Elektroseti": 3000
+        }
+      },
+      {
+        "type": "Stop",
+        "name": "Ulitsa Lizy Chaikinoi",
+        "latitude": 43.590317,
+        "longitude": 39.746833,
+        "road_distances": {
+          "Elektroseti": 4300,
+          "Ulitsa Dokuchaeva": 2000
+        }
+      }
+    ],
+    "render_settings": {
+      "width": 600,
+      "height": 400,
+      "padding": 50,
+      "stop_radius": 5,
+      "line_width": 14,
+      "bus_label_font_size": 20,
+      "bus_label_offset": [
+        7,
+        15
+      ],
+      "stop_label_font_size": 20,
+      "stop_label_offset": [
+        7,
+        -3
+      ],
+      "underlayer_color": [
+        255,
+        255,
+        255,
+        0.85
+      ],
+      "underlayer_width": 3,
+      "color_palette": [
+        "green",
+        [255, 160, 0],
+        "red"
+      ]
+    },
+    "stat_requests": [
+    ]
+  }
