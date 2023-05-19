@@ -16,7 +16,7 @@ int main()
      */
     JsonReader::Reader reader(std::cin);
     renderer::MapRenderer renderer(reader.GetRenderSettings(), reader.GetCatalogue());
-    renderer.Render()
+    renderer.Render(std::cout);
     // reader.Reply(std::cout);
     // std::cout << "success";
 

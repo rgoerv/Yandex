@@ -1,8 +1,15 @@
+#define _USE_MATH_DEFINES
+
 #include "geo.h"
 
 #include <cmath>
+#include <cstdint>
 
 namespace geo {
+
+inline static const double PI = 3.1415926535;
+inline static const double DR = M_PI / 180.;
+inline static const int64_t EARTH_RADIUS = 6371000;
 
 bool Coordinates::operator==(const Coordinates& other) const
 {

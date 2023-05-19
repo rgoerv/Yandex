@@ -57,11 +57,7 @@ struct HacherPair
     size_t operator()(const std::pair<std::string_view, std::string_view>& stops) const; // json reader : stops_to_dstns
 };
 
-
-inline const double EPSILON = 1e-6;
-bool IsZero(double value) {
-    return std::abs(value) < EPSILON;
-}
+bool IsZero(double value);
 
 class SphereProjector {
 public:

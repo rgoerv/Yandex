@@ -132,7 +132,7 @@ void Polyline::RenderObject(const RenderContext& context) const {
         out << " "sv << std::setprecision(6) << x << ","sv << y;
     }
 
-    out << "\" ";
+    out << "\"";
     RenderAttrs(context.out);
     out << "/>"sv;
 }

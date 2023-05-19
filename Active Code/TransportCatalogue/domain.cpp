@@ -19,6 +19,11 @@ size_t HacherPair::operator()(const std::pair<std::string_view, std::string_view
         + std::hash<std::string_view> {}(stops.second) * 37;
 }
 
+inline const double EPSILON = 1e-6;
+bool IsZero(double value) {
+    return std::abs(value) < EPSILON;
+}
+
 svg::Point SphereProjector::operator()(geo::Coordinates coords) const {
     return {
         (coords.lng - min_lon_) * zoom_coeff_ + padding_,
