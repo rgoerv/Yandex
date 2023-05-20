@@ -29,12 +29,13 @@ bool TransportCatalogue::CheckStop(std::string_view name) const
     return stopname_to_stop_.count(name) > 0;
 }
 
-void TransportCatalogue::AddBus(const std::string& name, const std::vector<const Stop*>& route, int64_t length, double geo_length)
+void TransportCatalogue::AddBus(const std::string& name, const std::vector<const Stop*>& route,
+    int64_t length, double geo_length, bool is_roundtrip, const Stop* last_stop)
 {
     std::set<const Stop*> unique(route.begin(), route.end());
     size_t unique_size = unique.size();
 
-    buses_.push_back(Bus { name, route, unique_size, length, geo_length });
+    buses_.push_back(Bus { name, route, unique_size, length, geo_length, is_roundtrip, last_stop});
     busname_to_bus_.insert({ buses_.back().name_, &buses_.back() });
     
     std::string_view busname = buses_.back().name_;
@@ -57,6 +58,9 @@ const std::unordered_map<const Stop*, std::set<std::string_view>>& TransportCata
     return stop_to_buses_;
 }
 
+const std::deque<Bus>& TransportCatalogue::GetBuses() const {
+    return buses_;
+}
 
 const BusInfo TransportCatalogue::GetBusInfo(std::string_view name) const
 {

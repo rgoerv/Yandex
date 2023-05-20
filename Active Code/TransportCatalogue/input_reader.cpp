@@ -167,8 +167,11 @@ void Reader::AddBus(std::string_view query_line)
     std::vector<std::string_view> stops(Spliting::SplitBus(query_line, delim));
     std::vector<std::string_view> full_route(stops);
 
+    bool is_roundtrip = true;
+    const Stop* last_stop = catalogue.FindStop(full_route.back());
     if (delim == '-')
     {
+        is_roundtrip = false;
         full_route.reserve(2 * stops.size());
         for (int64_t i = stops.size() - 2; i > -1; --i) {
             full_route.push_back(stops[i]);
@@ -195,7 +198,7 @@ void Reader::AddBus(std::string_view query_line)
         first = last;
     }
 
-    catalogue.AddBus(name, result, length, geo_length);
+    catalogue.AddBus(name, result, length, geo_length, is_roundtrip, last_stop);
 }
 
 } // namespace input

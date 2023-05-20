@@ -19,6 +19,11 @@ size_t HacherPair::operator()(const std::pair<std::string_view, std::string_view
         + std::hash<std::string_view> {}(stops.second) * 37;
 }
 
+size_t HacherPair::operator()(const geo::Coordinates& coords) const {
+    return std::hash<double> {}(coords.lat)
+        + std::hash<double> {}(coords.lng) * 37;
+}
+
 inline const double EPSILON = 1e-6;
 bool IsZero(double value) {
     return std::abs(value) < EPSILON;

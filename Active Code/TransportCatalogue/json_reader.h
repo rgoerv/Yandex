@@ -39,8 +39,9 @@ private:
     void AgreeDistances(const std::vector<const domain::Stop*>& stops, int64_t& lenght, double& geo_length) const;
 
     void StatRequestHandle();
-    void StopStatRequestHandle(const Node& request, int id);
-    void BusStatRequestHandle(const Node& request, int id);
+    void StopStatRequestHandle(const Node& request);
+    void BusStatRequestHandle(const Node& request);
+    void MapStatRequestHandle(const Node& request);
 };
 
 } // namespace JsonReader

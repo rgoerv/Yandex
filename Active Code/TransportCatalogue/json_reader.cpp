@@ -1,9 +1,7 @@
 #include "json_reader.h"
+#include "map_renderer.h"
 
-/*
- * Здесь можно разместить код наполнения транспортного справочника данными из JSON,
- * а также код обработки запросов к базе и формирование массива ответов в формате JSON
- */
+#include <sstream>
 
 namespace JsonReader {
 
@@ -59,17 +57,20 @@ void Reader::BusBaseRequestHandle(const Array& base_reauest) {
                 stops.push_back(catalogue.FindStop(stop.AsString()));
             }
 
-            if (!dictionary.at("is_roundtrip"s).AsBool()) {
+            bool is_roundtrip = dictionary.at("is_roundtrip"s).AsBool();
+            const Stop* last_stop = stops.back();
+            if (is_roundtrip == false) {
                 stops.reserve(2 * stops.size());
                 for (int64_t i = stops.size() - 2; i > -1; --i) {
                     stops.push_back(stops[i]);
                 }
+                is_roundtrip = true;
             }
 
             double geo_length = .0;
             int64_t length = 0;
             AgreeDistances(stops, length, geo_length);
-            catalogue.AddBus(dictionary.at("name"s).AsString(), stops, length, geo_length);
+            catalogue.AddBus(dictionary.at("name"s).AsString(), stops, length, geo_length, is_roundtrip, last_stop);
         }
     }
 }
@@ -92,18 +93,20 @@ void Reader::StatRequestHandle() {
 
     for (const auto& request : stat_requests) {
         const auto& type = request.AsMap().at("type"s).AsString();
-        const int id = request.AsMap().at("id"s).AsInt();
         if (type == "Stop"s) {
-            StopStatRequestHandle(request, id);
+            StopStatRequestHandle(request);
         } else if (type == "Bus"s) {
-            BusStatRequestHandle(request, id);
+            BusStatRequestHandle(request);
+        } else if (type == "Map") {
+            MapStatRequestHandle(request);
         }
     }
 }
 
-void Reader::BusStatRequestHandle(const Node& request, int id) {
+void Reader::BusStatRequestHandle(const Node& request) {
     auto [check, size, unique_size, distance, geo_distance] = catalogue.GetBusInfo(request.AsMap().at("name"s).AsString());
-            
+    const int id = request.AsMap().at("id"s).AsInt();
+
     Dict dictionary;
     dictionary.insert({ "request_id"s, Node { id } });           
             
@@ -121,7 +124,9 @@ void Reader::BusStatRequestHandle(const Node& request, int id) {
     stat_response.push_back(Node { dictionary });
 }
 
-void Reader::StopStatRequestHandle(const Node& request, int id) {
+void Reader::StopStatRequestHandle(const Node& request) {
+    const int id = request.AsMap().at("id"s).AsInt();
+
     Dict dictionary;
     dictionary.insert({ "request_id"s, Node { id } }); 
 
@@ -138,6 +143,19 @@ void Reader::StopStatRequestHandle(const Node& request, int id) {
         result.push_back(Node { static_cast<std::string>(bus) });
     }
     dictionary.insert({ "buses"s, Node { result } });
+
+    stat_response.push_back(Node { dictionary });
+}
+
+void Reader::MapStatRequestHandle(const Node& request) {
+    renderer::MapRenderer renderer(GetRenderSettings(), GetCatalogue());
+
+    std::stringstream render_out;
+    renderer.Render(render_out);
+
+    Dict dictionary;
+    dictionary.insert({ "map"s, render_out.str() });
+    dictionary.insert({ "request_id"s, request.AsMap().at("id"s).AsInt() });
 
     stat_response.push_back(Node { dictionary });
 }

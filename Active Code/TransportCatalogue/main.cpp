@@ -15,9 +15,7 @@ int main()
      * Вывести в stdout ответы в виде JSON
      */
     JsonReader::Reader reader(std::cin);
-    renderer::MapRenderer renderer(reader.GetRenderSettings(), reader.GetCatalogue());
-    renderer.Render(std::cout);
-    // reader.Reply(std::cout);
-    // std::cout << "success";
+    reader.Reply(std::cout);
+
 
 }

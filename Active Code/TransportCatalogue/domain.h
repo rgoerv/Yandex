@@ -31,12 +31,17 @@ struct Bus {
     size_t unique_size = 0;
     int64_t length_ = 0;
     double geo_length_ = 0;
-    explicit Bus(std::string name, const std::vector<const Stop*>& route, size_t size, int64_t length, double geo_length)
+    bool is_roundtrip_;
+    const Stop* last_stop_;
+    explicit Bus(std::string name, const std::vector<const Stop*>& route, size_t size, int64_t length,
+        double geo_length, bool is_roundtrip, const Stop* last_stop)
         : name_(name)
         , route_(route)
         , unique_size(size)
         , length_(length)
         , geo_length_(geo_length)
+        , is_roundtrip_(is_roundtrip)
+        , last_stop_(last_stop)
     {
     }
     bool CheckStop(const Stop* stop) const;
@@ -55,6 +60,7 @@ struct HacherPair
 {
     size_t operator()(const std::pair<const Stop*, const Stop*>& stops) const; // catalogue dist_btn_stops_
     size_t operator()(const std::pair<std::string_view, std::string_view>& stops) const; // json reader : stops_to_dstns
+    size_t operator()(const geo::Coordinates& coords) const; // map_renderer GetCoordinates
 };
 
 bool IsZero(double value);

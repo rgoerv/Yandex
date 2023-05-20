@@ -1,4 +1,4 @@
-#include "TestCatalogue.h"
+#include "TestCatalogueTextInput.h"
 #include "input_reader.h"
 #include "stat_reader.h"
 #include <cassert>
