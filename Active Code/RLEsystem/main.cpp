@@ -34,6 +34,7 @@ void Test() {
                             "asdasdasdasdasdasdasdasdasdasdasdasdasdasdassdasdassdasddeccccccccc"
                             "cccc"sv;
     EncodeRLE("test.txt"s, "test.rle"s);
+
     DecodeRLE("test.rle"s, "test2.txt"s);
 
     assert(GetFileContents("test.rle"s).size() < GetFileContents("test.txt"s).size() / 2);
