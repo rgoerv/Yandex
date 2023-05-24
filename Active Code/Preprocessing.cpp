@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <optional>
 
 using namespace std;
 using filesystem::path;
@@ -15,9 +16,78 @@ path operator""_p(const char* data, std::size_t sz) {
     return path(data, data + sz);
 }
 
-bool Preprocess(const path& in_file, const path& out_file) {
+optional<path> FindInclude(const path& search, const vector<path>& include_directories) {
+    vector<filesystem::path> indir;
+
+    for (const auto& path : include_directories) {
+        error_code err;
+        auto status = filesystem::status(path, err);
+        if(status.type() == filesystem::file_type::directory) {
+            for (const auto& pathindir : filesystem::directory_iterator(path)) {
+                indir.push_back(pathindir.path());
+            }
+        } 
+    }
+
+    for(const auto& path : include_directories) {
+        error_code err;
+        auto status = filesystem::status(path, err);
+        
+        if(status.type() == filesystem::file_type::regular) {
+            error_code erra_1, erra_2;
+            if (filesystem::absolute(path, erra_1).lexically_normal() == filesystem::absolute(search, erra_2).lexically_normal()) {   
+                return path;
+            }
+        }
+        else if(status.type() == filesystem::file_type::directory) {
+            auto path_req = FindInclude(filesystem::path(path / filesystem::path(search.filename())), indir);
+            if (path_req) {
+                return *path_req;
+            }
+        }
+    }
+    return nullopt;
+}
+
+
+bool Preprocess(const path& in_file, ostream& out, [[maybe_unused]] const vector<path>& include_directories) {
     
-    ofstream out(out_file);
+    ifstream in(in_file);
+    if(!in) {
+        return false;
+    }
+    
+    static regex quotes(R"(\s*#\s*include\s*"([^"]*)\"\s*)");
+    static regex TriaBrackets(R"(\s*#\s*include\s*<([^>]*)>\s*)");
+
+    path currdir = in_file.parent_path();
+    string line;
+
+    for (int nline = 1; getline(in, line); ++nline) {
+        smatch match;
+        if (regex_match(line, match, quotes) || regex_match(line, match, TriaBrackets)) {
+            path headerfile = string(match[1]);
+            path inthisdir = path(currdir / headerfile);
+            error_code err;
+            bool status = (filesystem::status(inthisdir, err).type() == filesystem::file_type::regular);
+            if (status) {
+                Preprocess(inthisdir, out, include_directories);
+            } else {
+                auto path = FindInclude(headerfile, include_directories);
+                if (path) {
+                    Preprocess(*path, out, include_directories);
+                } else {
+                    cout << "unknown include file " << headerfile.generic_string()
+                         << " at file " << in_file.generic_string() << " at line " << nline << endl;
+                    return false;
+                }
+            }
+        } else {
+            out << line << endl;
+        }
+    }
+
+    return true;    
 }
 
 bool Preprocess(const path& in_file, const path& out_file, const vector<path>& include_directories) {
@@ -27,26 +97,37 @@ bool Preprocess(const path& in_file, const path& out_file, const vector<path>& i
         return false;
     }
 
-    static regex quotes(R"\s*#\s*include\s*"([^"]*)"\s*");
+    static regex quotes(R"(\s*#\s*include\s*"([^"]*)\"\s*)");
+    static regex TriaBrackets(R"(\s*#\s*include\s*<([^>]*)>\s*)");
 
+    ofstream out(out_file);
 
+    path currdir = in_file.parent_path();
+    string line;
 
-
-    for(const auto& path : include_directories) {
-        error_code err;
-        auto status = filesystem::status(path, err);
-        
-        if(status.type() == filesystem::file_type::regular) {
-            if(Preprocess(path, out)) {
-
-            }            
-        } 
-        else if(status.type() == filesystem::file_type::directory) {
-            if(Preprocess(path, ))
+    for (int nline = 1; getline(in, line); ++nline) {
+        smatch match;
+        if (regex_match(line, match, quotes) || regex_match(line, match, TriaBrackets)) {
+            path headerfile = string(match[1]);
+            path inthisdir = path(currdir / headerfile);
+            error_code err;
+            bool status = (filesystem::status(inthisdir, err).type() == filesystem::file_type::regular);
+            if (status) {
+                Preprocess(inthisdir, out, include_directories);
+            } else {
+                auto path = FindInclude(headerfile, include_directories);
+                if (path) {
+                    Preprocess(*path, out, include_directories);
+                } else {
+                    cout << "unknown include file " << headerfile.generic_string() 
+                        << " at file " << in_file.generic_string() << " at line " << nline;
+                    return false;
+                }
+            }
+        } else {
+            out << line << endl;
         }
-
     }
-
     return true;
 }
 
