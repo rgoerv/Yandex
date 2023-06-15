@@ -67,7 +67,7 @@ public:
     bool IsArray() const {
         return std::holds_alternative<Array>(*this);
     }
-    const Array& AsArray() const {
+    Array& AsArray() {
         using namespace std::literals;
         if (!IsArray()) {
             throw std::logic_error("Not an array"s);
@@ -91,7 +91,7 @@ public:
     bool IsDict() const {
         return std::holds_alternative<Dict>(*this);
     }
-    const Dict& AsDict() const {
+    Dict& AsDict() {
         using namespace std::literals;
         if (!IsDict()) {
             throw std::logic_error("Not a dict"s);
@@ -102,6 +102,10 @@ public:
 
     bool operator==(const Node& rhs) const {
         return GetValue() == rhs.GetValue();
+    }
+
+    Value& GetValue() {
+        return *this;
     }
 
     const Value& GetValue() const {

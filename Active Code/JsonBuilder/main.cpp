@@ -36,4 +36,14 @@ int main() {
         cout
     );
     cout << endl;
+
+    //json::Builder{}.StartDict().Build();  // правило 3
+    //json::Builder{}.StartDict().Key("1"s).Value(1).Value(1);  // правило 2
+    //json::Builder{}.StartDict().Key("1"s).Key(""s);  // правило 1
+    //json::Builder{}.StartArray().Key("1"s);  // правило 4
+    //json::Builder{}.StartArray().EndDict();  // правило 4
+    //json::Builder{}.StartArray().Value(1).Value(2).EndDict();  // правило 5 
+    //json::Builder {}.StartDict().Key("1").Key("2"s);
+    //json::Builder {}.StartDict().Key("1").Build();
+
 }
