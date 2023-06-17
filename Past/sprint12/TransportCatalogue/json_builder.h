@@ -10,26 +10,12 @@
 namespace json {
 
 class Builder;
-class ValueContext;
-class ArrayValueContext;
-class ArrayItemContext;
+
 class DictKeyContext;
 class DictValueContext;
 class DictItemContext;
 
-class ValueContext {
-public:
-    ValueContext(Builder& builder)
-        : builder_(builder)
-    {
-    }
-
-    json::Node Build();
-
-private:
-    Builder& builder_;
-};
-
+class ArrayItemContext;
 
 class DictKeyContext {
 public:
@@ -74,7 +60,6 @@ private:
     Builder& builder_;
 };
 
-
 class ArrayItemContext {
 public:
     ArrayItemContext(Builder& builder)
@@ -82,25 +67,9 @@ public:
     {
     }
 
-    ArrayValueContext Value(Node::Value value);
+    ArrayItemContext Value(Node::Value value);
     ArrayItemContext StartArray();
     DictItemContext StartDict();
-    Builder& EndArray();
-
-private:
-    Builder& builder_;
-};
-
-class ArrayValueContext {
-public:
-    ArrayValueContext(Builder& builder)
-        : builder_(builder)
-    {
-    }
-
-    ArrayValueContext Value(Node::Value value);
-    DictItemContext StartDict();
-    ArrayItemContext StartArray();
     Builder& EndArray();
 
 private:

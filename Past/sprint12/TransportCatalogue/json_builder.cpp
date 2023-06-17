@@ -3,36 +3,31 @@
 
 namespace json {
 
-json::Node ValueContext::Build()
-{
-    return builder_.Build();
-}
-
 DictValueContext DictKeyContext::Value(Node::Value value)
 {
     builder_.Value(value);
-    return {builder_};
+    return DictValueContext{ builder_ };
 }
 
 ArrayItemContext DictKeyContext::StartArray()
 {
     builder_.StartArray();
-    return {builder_};
+    return ArrayItemContext{ builder_ };
 }
 
 DictItemContext DictKeyContext::StartDict()
 {
     builder_.StartDict();
-    return {builder_};
+    return DictItemContext{ builder_ };
 }
 
 DictKeyContext DictValueContext::Key(std::string key)
 {
     builder_.Key(std::move(key));
-    return {builder_};
+    return DictKeyContext{ builder_ };
 }
 
-Builder &DictValueContext::EndDict()
+Builder& DictValueContext::EndDict()
 {
     return builder_.EndDict();
 }
@@ -40,53 +35,33 @@ Builder &DictValueContext::EndDict()
 DictKeyContext DictItemContext::Key(std::string key)
 {
     builder_.Key(std::move(key));
-    return DictKeyContext{builder_};
+    return DictKeyContext{ builder_ };
 }
 
-Builder &DictItemContext::EndDict()
-{
+Builder& DictItemContext::EndDict()
+{ 
     return builder_.EndDict();
 }
 
-ArrayValueContext ArrayItemContext::Value(Node::Value value)
+ArrayItemContext ArrayItemContext::Value(Node::Value value)
 {
-    return builder_.Value(value);
+    builder_.Value(value);
+    return ArrayItemContext{ builder_ };
 }
 
 ArrayItemContext ArrayItemContext::StartArray()
 {
-    return builder_.StartArray();
+    builder_.StartArray();
+    return ArrayItemContext{ builder_ };
 }
 
 DictItemContext ArrayItemContext::StartDict()
 {
-    return builder_.StartDict();
-}
-
-Builder &ArrayItemContext::EndArray()
-{
-    return builder_.EndArray();
-}
-
-ArrayValueContext ArrayValueContext::Value(Node::Value value)
-{
-    builder_.Value(value);
-    return {builder_};
-}
-
-DictItemContext ArrayValueContext::StartDict()
-{
     builder_.StartDict();
-    return {builder_};
+    return DictItemContext{ builder_ };
 }
 
-ArrayItemContext ArrayValueContext::StartArray()
-{
-    builder_.StartArray();
-    return {builder_};
-}
-
-Builder &ArrayValueContext::EndArray()
+Builder& ArrayItemContext::EndArray()
 {
     return builder_.EndArray();
 }
@@ -237,7 +212,7 @@ ArrayItemContext Builder::StartArray()
     return ArrayItemContext{*this};
 }
 
-Builder &Builder::EndDict()
+Builder& Builder::EndDict()
 {
     if (nodes_stack_.empty() || !nodes_stack_.top()->IsDict())
     {
@@ -247,7 +222,7 @@ Builder &Builder::EndDict()
     return *this;
 }
 
-Builder &Builder::EndArray()
+Builder& Builder::EndArray()
 {
     if (nodes_stack_.empty() || !nodes_stack_.top()->IsArray())
     {
@@ -269,6 +244,5 @@ json::Node Builder::Build()
     }
     return root_;
 }
-
 
 } // namespace json
