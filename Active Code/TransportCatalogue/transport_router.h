@@ -5,7 +5,7 @@
 #include "router.h"
 #include "graph.h"
 
-#include "log_duration.h"
+// #include "log_duration.h"
 
 #include <memory>
 
@@ -69,12 +69,13 @@ public:
 	using Vertex_Ids = std::unordered_map<const Stop*, VertexId>;
 	using EdgeBusSpan = std::unordered_map<std::pair<VertexId, VertexId>, std::pair<const Bus*, size_t>, HacherPair>;
 
-	TransportRouter(std::unique_ptr<graph>&& graph, std::unique_ptr<Vertex_Ids>&& vertex_ids, 
+	TransportRouter(std::unique_ptr<graph>&& graph, std::unique_ptr<Router<double>>&& router, std::unique_ptr<Vertex_Ids>&& vertex_ids,
 		std::unique_ptr<EdgeBusSpan>&& span_counts,
 		std::unique_ptr<std::unordered_map<VertexId, const Stop*>>&& id_stop,
 		const Catalogue::TransportCatalogue& ts,
 		const domain::RoutingSettings routing_settings)
-		: graph_(std::move(graph)), 
+		: graph_(std::move(graph)),
+		router_(std::move(router)),
 		stop_to_vertex(std::move(vertex_ids)),
 		edge_to_bus_span(std::move(span_counts)),
 		id_to_stop(std::move(id_stop)),
@@ -84,9 +85,10 @@ public:
 	}
 
 	std::optional<const RouteInfo> GetRouteInfo(std::string_view from, std::string_view to){
-		LOG_DURATION("GetRouteInfo");
-		Router router(*graph_);
-		const auto& route_info = router.BuildRoute((*stop_to_vertex)[ts_.FindStop(from)], (*stop_to_vertex)[ts_.FindStop(to)]);
+		// LOG_DURATION("GetRouteInfo");
+		// Router router(*graph_);
+
+		const auto& route_info = (*router_).BuildRoute((*stop_to_vertex)[ts_.FindStop(from)], (*stop_to_vertex)[ts_.FindStop(to)]);
 
 		if (!route_info) {
 			return std::nullopt;
@@ -115,13 +117,12 @@ public:
 
 			info.items.push_back(std::move(item_bus));
 		}
-
 		return info;
 	}
 
 private:
-	
 	std::unique_ptr<graph> graph_;
+	std::unique_ptr<Router<double>> router_;
 
 	std::unique_ptr<Vertex_Ids> stop_to_vertex;
 	std::unique_ptr<EdgeBusSpan> edge_to_bus_span;

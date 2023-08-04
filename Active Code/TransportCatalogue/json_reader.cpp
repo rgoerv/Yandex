@@ -4,7 +4,7 @@
 #include "map_renderer.h"
 #include "transport_router.h"
 
-#include "log_duration.h"
+// #include "log_duration.h"
 
 #include <sstream>
 
@@ -97,7 +97,7 @@ void Reader::StatRequestHandle() {
     const Array stat_requests(document.GetRoot().AsDict().at("stat_requests"s).AsArray());
 
     static graph graph_(catalogue.GetStopCount() * 2);
-    bool need_graph = true;
+    bool need_build_router = true;
 
     for (const auto& request : stat_requests) {
         const auto& type = request.AsDict().at("type"s).AsString();
@@ -108,12 +108,13 @@ void Reader::StatRequestHandle() {
         } else if (type == "Map") {
             MapStatRequestHandle(request);
         } else if (type == "Route") {
-            if (need_graph) {
-                LOG_DURATION("Build Graph");
-                BuildGraph(graph_); // build one graph with all, to use in transport router 
-                need_graph = false;
+            if (need_build_router) {
+                // LOG_DURATION("Build Graph");
+                BuildGraph(graph_); // build one graph with all, to use in transport router
+                BuildTransportRouter(graph_);
+                need_build_router = false;
             }
-            RouterStatRequestHandle(request, graph_);
+            RouterStatRequestHandle(request);
         }
     }
 }
@@ -170,6 +171,16 @@ void Reader::BuildGraph(graph& graph_) {
             ++start;
         }
     }
+}
+
+void Reader::BuildTransportRouter(graph& graph_) {
+    router = std::move(std::make_unique<TRouter::TransportRouter>(TRouter::TransportRouter{
+        std::move(std::make_unique<graph>(graph_)), 
+        std::move(std::make_unique<Router<double>>(Router<double>{graph_})),
+        std::move(std::make_unique<Vertex_Ids>(stop_to_vertex)),
+        std::move(std::make_unique<EdgeBusSpan>(edge_to_bus_span)),
+        std::move(std::make_unique<std::unordered_map<VertexId, const Stop*>>(id_to_stop)),
+        GetCatalogue(), GetRoutingSettings() }));
 }
 
 void Reader::BusStatRequestHandle(const Node& request) {
@@ -241,20 +252,23 @@ void Reader::MapStatRequestHandle(const Node& request) {
     stat_response.push_back(builder.Build());
 }
 
-void Reader::RouterStatRequestHandle(const Node& request, const graph& graph_) {
-    LOG_DURATION("Router Request Process");
-    TRouter::TransportRouter router(std::move(std::make_unique<graph>(graph_)),
-        std::move(std::make_unique<Vertex_Ids>(stop_to_vertex)),
-        std::move(std::make_unique<EdgeBusSpan>(edge_to_bus_span)),
-        std::move(std::make_unique<std::unordered_map<VertexId, const Stop*>>(id_to_stop)),
-        GetCatalogue(), GetRoutingSettings());
+void Reader::RouterStatRequestHandle(const Node& request) {
+    // LOG_DURATION("Router Request Process");
 
-    const auto& route_info = router.GetRouteInfo(request.AsDict().at("from").AsString(), 
-        request.AsDict().at("to").AsString());
-    
     json::Builder builder;
     builder.StartDict().Key("request_id").Value(request.AsDict().at("id"s).AsInt());
 
+    std::string_view from = request.AsDict().at("from").AsString();
+    std::string_view to = request.AsDict().at("to").AsString();
+
+    if (catalogue.GetBusesInStop(from).size() == 0 || catalogue.GetBusesInStop(to).size() == 0) {
+        builder.Key("error_message"s).Value("not found"s).EndDict();
+        stat_response.push_back(builder.Build());
+        return;
+    }
+
+    const auto& route_info = (*router).GetRouteInfo(from, to);
+    
     if (!route_info) {
         builder.Key("error_message"s).Value("not found"s).EndDict();
         stat_response.push_back(builder.Build());
@@ -266,20 +280,22 @@ void Reader::RouterStatRequestHandle(const Node& request, const graph& graph_) {
 
     for (const auto& item : (*route_info).items) {
         builder.StartDict();
+
         switch (item.type)
         {
-            case RouteReqestType::WAIT : builder.Key("type").Value("Wait")
-                .Key("stop_name").Value(json::Node(static_cast<std::string>(*(item.stop_name))).AsString())
-                .Key("time").Value(json::Node(item.time).AsDouble());
-                break;
-            case RouteReqestType::BUS : builder.Key("type").Value("Bus")
-                .Key("bus").Value(json::Node(static_cast<std::string>(*(item.bus_name))).AsString())
-                .Key("time").Value(json::Node(item.time).AsDouble())
-                .Key("span_count").Value(json::Node(static_cast<int>(*(item.span_count))).AsInt());
-                break;
-            default:
-                break;
+        case RouteReqestType::WAIT: builder.Key("type").Value("Wait")
+            .Key("stop_name").Value(json::Node(static_cast<std::string>(*(item.stop_name))).AsString())
+            .Key("time").Value(json::Node(item.time).AsDouble());
+            break;
+        case RouteReqestType::BUS: builder.Key("type").Value("Bus")
+            .Key("bus").Value(json::Node(static_cast<std::string>(*(item.bus_name))).AsString())
+            .Key("time").Value(json::Node(item.time).AsDouble())
+            .Key("span_count").Value(json::Node(static_cast<int>(*(item.span_count))).AsInt());
+            break;
+        default:
+            break;
         }
+
         builder.EndDict();
     }
     builder.EndArray().EndDict();

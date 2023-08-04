@@ -45,6 +45,8 @@ private:
     std::unordered_map<std::pair<std::string_view, std::string_view>, int64_t, HacherPair> stops_to_dstns;
     Array stat_response;
 
+    std::unique_ptr<TRouter::TransportRouter> router;
+
     Vertex_Ids stop_to_vertex;
     EdgeBusSpan edge_to_bus_span;
 
@@ -59,9 +61,10 @@ private:
     void StopStatRequestHandle(const Node& request);
     void BusStatRequestHandle(const Node& request);
     void MapStatRequestHandle(const Node& request);
-    void RouterStatRequestHandle(const Node& request, const graph& graph_);
+    void RouterStatRequestHandle(const Node& request);
 
     void BuildGraph(graph& graph_);
+    void BuildTransportRouter(graph& graph_);
 };
 
 } // namespace JsonReader
