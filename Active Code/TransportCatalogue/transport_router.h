@@ -5,9 +5,8 @@
 #include "router.h"
 #include "graph.h"
 
-// #include "log_duration.h"
-
 #include <memory>
+#include <unordered_map>
 
 namespace TRouter {
 
@@ -17,36 +16,18 @@ using namespace domain;
 
 using namespace std::literals;
 
+using Stop_VertexId = std::unordered_map<const Stop*, VertexId>;
+using VertexId_Sport = std::unordered_map<VertexId, const Stop*>;
+using Edge_BusSpan = std::unordered_map<std::pair<VertexId, VertexId>, std::pair<const Bus*, size_t>, HacherPair>;
+
 enum class RouteReqestType {
 	NONE,
 	WAIT,
 	BUS
 };
 
-//class RouteItem {
-//public:
-//
-//
-//private:
-//	RouteReqestType type = RouteReqestType::NONE;
-//	double time = .0;
-//};
-//
-//class RouteWait : public RouteItem {
-//public:
-//
-//private:
-//	std::optional<std::string_view> stop_name;
-//};
-//
-//class RouteWait : public RouteItem {
-//public:
-//
-//private:
-//	std::optional<std::string_view> bus_name;
-//	std::optional<size_t> span_count;
-//};
-
+// need class structure, with general class and two classes with relevant request type
+// in TRouter::RouteInfo elements type in vector - general class 
 struct RouteItem {
 	RouteReqestType type = RouteReqestType::NONE;
 	double time = .0;
@@ -66,70 +47,37 @@ struct RouteInfo
 class TransportRouter {
 public:
 	using graph = DirectedWeightedGraph<double>;
-	using Vertex_Ids = std::unordered_map<const Stop*, VertexId>;
-	using EdgeBusSpan = std::unordered_map<std::pair<VertexId, VertexId>, std::pair<const Bus*, size_t>, HacherPair>;
 
-	TransportRouter(std::unique_ptr<graph>&& graph, std::unique_ptr<Router<double>>&& router, std::unique_ptr<Vertex_Ids>&& vertex_ids,
-		std::unique_ptr<EdgeBusSpan>&& span_counts,
-		std::unique_ptr<std::unordered_map<VertexId, const Stop*>>&& id_stop,
+	TransportRouter(std::unique_ptr<graph>&& graph, 
+		std::unique_ptr<Router<double>>&& router, 
+		std::unique_ptr<Stop_VertexId>&& vertex_ids,
+		std::unique_ptr<Edge_BusSpan>&& span_counts,
+		std::unique_ptr<VertexId_Sport>&& id_stop,
 		const Catalogue::TransportCatalogue& ts,
 		const domain::RoutingSettings routing_settings)
 		: graph_(std::move(graph)),
 		router_(std::move(router)),
 		stop_to_vertex(std::move(vertex_ids)),
 		edge_to_bus_span(std::move(span_counts)),
-		id_to_stop(std::move(id_stop)),
+		vertex_to_stop(std::move(id_stop)),
 		ts_(ts), 
 		routing_settings_(routing_settings)
 	{
 	}
 
-	std::optional<const RouteInfo> GetRouteInfo(std::string_view from, std::string_view to){
-		// LOG_DURATION("GetRouteInfo");
-		// Router router(*graph_);
-
-		const auto& route_info = (*router_).BuildRoute((*stop_to_vertex)[ts_.FindStop(from)], (*stop_to_vertex)[ts_.FindStop(to)]);
-
-		if (!route_info) {
-			return std::nullopt;
-		}
-
-		RouteInfo info;
-		info.total_time = (*route_info).weight;
-		info.items.reserve((*route_info).edges.size());
-
-		for (const auto& item : (*route_info).edges) {
-			const auto& edge = (*graph_).GetEdge(item);
-
-			RouteItem item_wait;
-			item_wait.type = RouteReqestType::WAIT;
-			item_wait.time = routing_settings_.bus_wait_time_;
-			item_wait.stop_name = (*id_to_stop)[edge.from]->name_;
-
-			info.items.push_back(std::move(item_wait));
-
-			RouteItem item_bus;
-
-			item_bus.type = RouteReqestType::BUS;
-			item_bus.time = edge.weight - routing_settings_.bus_wait_time_;
-			item_bus.bus_name = (*edge_to_bus_span)[{edge.from, edge.to}].first->name_;
-			item_bus.span_count = (*edge_to_bus_span)[{edge.from, edge.to}].second;
-
-			info.items.push_back(std::move(item_bus));
-		}
-		return info;
-	}
+	std::optional<const RouteInfo> GetRouteInfo(std::string_view from, std::string_view to) const;
 
 private:
-	std::unique_ptr<graph> graph_;
-	std::unique_ptr<Router<double>> router_;
+	std::unique_ptr<graph> graph_ = nullptr;
+	std::unique_ptr<Router<double>> router_ = nullptr;
 
-	std::unique_ptr<Vertex_Ids> stop_to_vertex;
-	std::unique_ptr<EdgeBusSpan> edge_to_bus_span;
-	std::unique_ptr<std::unordered_map<VertexId, const Stop*>> id_to_stop;
+	std::unique_ptr<Stop_VertexId> stop_to_vertex = nullptr;
+	std::unique_ptr<VertexId_Sport> vertex_to_stop = nullptr;
+
+	std::unique_ptr<Edge_BusSpan> edge_to_bus_span = nullptr;
 
 	const Catalogue::TransportCatalogue& ts_;
 	const domain::RoutingSettings routing_settings_;
 };
 
-} // namespace Router
+} // namespace TRouter

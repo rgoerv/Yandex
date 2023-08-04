@@ -1,10 +1,5 @@
 #pragma once
 
-/*
- * Здесь можно разместить код наполнения транспортного справочника данными из JSON,
- * а также код обработки запросов к базе и формирование массива ответов в формате JSON
- */
-
 #include "transport_catalogue.h"
 #include "transport_router.h"
 #include "geo.h"
@@ -14,6 +9,8 @@
 
 #include <utility>
 #include <variant>
+#include <unordered_map>
+#include <memory>
 
 namespace JsonReader {
 
@@ -24,13 +21,13 @@ using namespace domain;
 using namespace graph;
 using namespace TRouter;
 
-using Vertex_Ids = std::unordered_map<const Stop*, VertexId>;
-using EdgeBusSpan = std::unordered_map<std::pair<VertexId, VertexId>, std::pair<const Bus*, size_t>, HacherPair>;
+using Stop_VertexId = std::unordered_map<const Stop*, VertexId>;
+using VertexId_Sport = std::unordered_map<VertexId, const Stop*>;
+using Edge_BusSpan = std::unordered_map<std::pair<VertexId, VertexId>, std::pair<const Bus*, size_t>, HacherPair>;
 
 class Reader {
 public:
     using graph = DirectedWeightedGraph<double>;
-    using SpanCount = size_t;
 
     Reader(std::istream& input);
     void Reply(std::ostream& output) const;
@@ -47,10 +44,10 @@ private:
 
     std::unique_ptr<TRouter::TransportRouter> router;
 
-    Vertex_Ids stop_to_vertex;
-    EdgeBusSpan edge_to_bus_span;
+    Stop_VertexId stop_to_vertex;
+    VertexId_Sport id_to_stop;
 
-    std::unordered_map<VertexId, const Stop*> id_to_stop;
+    Edge_BusSpan edge_to_bus_span;
 
     void BaseRequestHandle();
     void StopBaseRequestHandle(const Array& base_requests);

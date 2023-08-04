@@ -2,8 +2,6 @@
 
 #include "graph.h"
 
-#include "log_duration.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
