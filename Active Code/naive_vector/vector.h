@@ -153,6 +153,49 @@ public:
         std::destroy_n(data_.GetAddress(), size_);
     }
 
+    void Resize(size_t new_size) {
+        if(size_ < new_size) {
+            if(data_.Capacity() < new_size) {
+                Reserve(new_size);
+            }
+            std::uninitialized_value_construct_n(data_.GetAddress() + size_, new_size - size_);
+        }
+        else {
+            std::destroy_n(data_.GetAddress() + new_size, size_ - new_size);
+        }
+        size_ = new_size;
+    }
+
+    template <typename Forward>
+    void PushBack(Forward&& value) {
+        if(size_ >= data_.Capacity()) {
+            
+            RawMemory<T> new_data(size_ == 0 ? 1 : size_ * 2);
+
+            new (new_data.GetAddress() + size_) T(std::forward<Forward>(value));
+
+            if constexpr (std::is_nothrow_move_constructible_v<T> || !std::is_copy_constructible_v<T>) {
+                std::uninitialized_move_n(data_.GetAddress(), size_, new_data.GetAddress());
+            } else {
+                std::uninitialized_copy_n(data_.GetAddress(), size_, new_data.GetAddress());
+            }
+            
+            std::destroy_n(data_.GetAddress(), size_);
+            data_.Swap(new_data);
+        }
+        else {
+            new (data_.GetAddress() + size_) T(std::forward<Forward>(value));
+        }
+        ++size_;
+    }
+    
+    void PopBack() noexcept {
+        assert(size_ > 0);
+        std::destroy_n(data_.GetAddress() + size_, 1);
+        --size_;
+    }
+
+
     void Reserve(size_t new_capacity) {
         if (new_capacity <= data_.Capacity()) {
             return;
