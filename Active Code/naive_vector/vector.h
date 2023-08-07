@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <new>
 #include <utility>
+#include <algorithm>
 #include <memory>
 
 template <typename T>
@@ -15,22 +16,27 @@ public:
     
     explicit RawMemory(size_t capacity)
         : buffer_(Allocate(capacity))
-        , capacity_(capacity) {
+        , capacity_(capacity) // 
+    {
     }
 
-    RawMemory(RawMemory&& other) noexcept {
-
+    RawMemory(RawMemory&& other) noexcept
+        : buffer_(std::exchange(other.buffer_, nullptr))
+        , capacity_(std::exchange(other.capacity_, 0)) //
+    {
     }
 
     ~RawMemory() {
         Deallocate(buffer_);
     }
 
-    RawMemory& operator=(RawMemory&& rhs) noexcept { 
-
+    RawMemory& operator=(RawMemory&& rhs) noexcept {
+        if(this != &rhs) {
+            buffer_ = std::exchange(rhs.buffer_, nullptr);
+            capacity_ = std::exchange(rhs.capacity_, 0);
+        }
+        return *this;
     }
-
-
 
     T* operator+(size_t offset) noexcept {
         // Разрешается получать адрес ячейки памяти, следующей за последним элементом массива
@@ -83,17 +89,14 @@ private:
     size_t capacity_ = 0;
 };
 
-
-
 template <typename T>
 class Vector {
 public:
-    
     Vector() = default;
 
     explicit Vector(size_t size)
         : data_(size)
-        , size_(size)
+        , size_(size) //
     {
         std::uninitialized_value_construct_n(data_.GetAddress(), size);
     }
@@ -103,6 +106,47 @@ public:
         , size_(other.size_)  //
     {
         std::uninitialized_copy_n(other.data_.GetAddress(), size_, data_.GetAddress());
+    }
+
+    Vector(Vector&& other) noexcept 
+        : data_(std::move(other.data_))
+        , size_(std::exchange(other.size_, 0)) // 
+    {  
+    }
+
+    Vector& operator=(const Vector& rhs) {
+        if (this != &rhs) {
+            if (data_.Capacity() < rhs.size_) {
+                Vector rhs_copy(rhs);
+                Swap(rhs_copy);
+            } else {
+                if(rhs.size_ < size_) {
+                    std::copy_n(rhs.data_.GetAddress(), rhs.size_, data_.GetAddress());
+                    std::destroy_n(data_.GetAddress() + rhs.size_, size_ - rhs.size_);
+                }
+                else {
+                    std::copy_n(rhs.data_.GetAddress(), size_, data_.GetAddress());
+                    std::uninitialized_copy_n(rhs.data_.GetAddress() + size_, rhs.size_ - size_, data_.GetAddress() + size_);   
+                }           
+                size_ = rhs.size_;
+            }
+        }
+        return *this;
+        
+    }
+
+    Vector& operator=(Vector&& rhs) noexcept {
+        if (this != &rhs) {
+            Swap(rhs);
+        }
+        return *this;
+    }
+
+    void Swap(Vector& other) noexcept {
+        if(this != &other) {
+            data_.Swap(other.data_);
+            std::swap(size_, other.size_);
+        }
     }
 
     ~Vector() {
