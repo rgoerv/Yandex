@@ -124,6 +124,13 @@ public:
         throw BadOptionalAccess();
     }
 
+    template<typename... Units>
+    void Emplace(Units&&... units) {
+        Reset();
+        element = new(&data_[0]) T(std::forward<Units>(units)...);
+        is_initialized_ = true;
+    }
+
     void Reset() {
         if(is_initialized_) {
             element->~T();
