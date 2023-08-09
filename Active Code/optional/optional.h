@@ -97,10 +97,13 @@ public:
 
     // Операторы * и -> не должны делать никаких проверок на пустоту Optional.
     // Эти проверки остаются на совести программиста
-    T& operator*(){
+    T&& operator*() && {
+        return std::move(*element);
+    }
+    T& operator*() & {
         return *element;
     }
-    const T& operator*() const {
+    const T& operator*() const& {
         return *element;
     }
     T* operator->() {
@@ -111,13 +114,21 @@ public:
     }
 
     // Метод Value() генерирует исключение BadOptionalAccess, если Optional пуст
-    T& Value() {
+    T& Value() & {
         if(is_initialized_) {
             return *element;
         }
         throw BadOptionalAccess();
     }
-    const T& Value() const {
+
+    [[nodiscard]] T&& Value() && {
+        if(is_initialized_) {
+            return std::move(*element);
+        }
+        throw BadOptionalAccess();
+    }
+
+    [[nodiscard]] const T& Value() const& {
         if(is_initialized_) {
             return *element;
         }

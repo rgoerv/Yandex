@@ -6,8 +6,6 @@
 #include <algorithm>
 #include <memory>
 
-#include <iostream>
-
 template <typename T>
 class RawMemory {
 public:
@@ -94,6 +92,9 @@ private:
 template <typename T>
 class Vector {
 public:
+    using iterator = T*;
+    using const_iterator = const T*;
+
     Vector() = default;
 
     explicit Vector(size_t size)
@@ -143,9 +144,6 @@ public:
         }
         return *this;
     }
-
-    using iterator = T*;
-    using const_iterator = const T*;
     
     iterator begin() noexcept {
         return data_.GetAddress();
@@ -267,9 +265,7 @@ public:
     template <typename Forward>
     void PushBack(Forward&& value) {
         if(size_ >= data_.Capacity()) {
-            
             RawMemory<T> new_data(size_ == 0 ? 1 : size_ * 2);
-
             new (new_data.GetAddress() + size_) T(std::forward<Forward>(value));
 
             if constexpr (std::is_nothrow_move_constructible_v<T> || !std::is_copy_constructible_v<T>) {
@@ -277,7 +273,6 @@ public:
             } else {
                 std::uninitialized_copy_n(data_.GetAddress(), size_, new_data.GetAddress());
             }
-            
             std::destroy_n(data_.GetAddress(), size_);
             data_.Swap(new_data);
         }
@@ -290,7 +285,6 @@ public:
     template <typename... Args>
     T& EmplaceBack(Args&&... args) {
         if(size_ >= data_.Capacity()) {
-            
             RawMemory<T> new_data(size_ == 0 ? 1 : size_ * 2);
             new (new_data.GetAddress() + size_) T(std::forward<Args>(args)...);
 
@@ -299,7 +293,6 @@ public:
             } else {
                 std::uninitialized_copy_n(data_.GetAddress(), size_, new_data.GetAddress());
             }
-            
             std::destroy_n(data_.GetAddress(), size_);
             data_.Swap(new_data);
         }
