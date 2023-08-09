@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <memory>
 
+#include <iostream>
+
 template <typename T>
 class RawMemory {
 public:
@@ -142,15 +144,111 @@ public:
         return *this;
     }
 
+    using iterator = T*;
+    using const_iterator = const T*;
+    
+    iterator begin() noexcept {
+        return data_.GetAddress();
+    }
+
+    iterator end() noexcept {
+        return data_.GetAddress() + size_;
+    }
+
+    const_iterator begin() const noexcept {
+        return data_.GetAddress();
+    }
+
+    const_iterator end() const noexcept {
+        return data_.GetAddress() + size_;
+    }
+
+    const_iterator cbegin() const noexcept {
+        return data_.GetAddress();
+    }
+
+    const_iterator cend() const noexcept {
+        return data_.GetAddress() + size_;
+    }
+
+    template <typename... Args>
+    iterator Emplace(const_iterator pos, Args&&... args) {
+        assert((pos >= cbegin()) && (pos <= cend()));
+        auto dst = std::distance(cbegin(), pos);
+
+        if(size_ >= data_.Capacity()) {
+            RawMemory<T> new_data(size_ == 0 ? 1 : size_ * 2);
+            new (new_data.GetAddress() + dst) T(std::forward<Args>(args)...);
+            try{
+                if constexpr (std::is_nothrow_move_constructible_v<T> || !std::is_copy_constructible_v<T>) {
+                    std::uninitialized_move_n(data_.GetAddress(), dst, new_data.GetAddress());
+                } else {
+                    std::uninitialized_copy_n(data_.GetAddress(), dst, new_data.GetAddress());
+                }
+            } catch(...) {
+                std::destroy_at(new_data.GetAddress() + dst);
+                throw;
+            }
+            try {
+                if constexpr (std::is_nothrow_move_constructible_v<T> || !std::is_copy_constructible_v<T>) {
+                    std::uninitialized_move_n(data_.GetAddress() + dst, size_ - dst, new_data.GetAddress() + dst + 1);
+                } else {
+                    std::uninitialized_copy_n(data_.GetAddress() + dst, size_ - dst, new_data.GetAddress() + dst + 1);
+                }
+            } catch(...) {
+                std::destroy_n(new_data.GetAddress(), dst);
+                throw;
+            }
+            std::destroy_n(data_.GetAddress(), size_);
+            data_.Swap(new_data);
+        }
+        else {
+            if(pos != cend()) {
+                // временный обьект со значением(уберегаем от перезаписывания, если элемент того же вектора)
+                T copy(std::forward<Args>(args)...);
+                // cдвигаем последный элемент верктора вправо в неинициализированную область
+                new (data_.GetAddress() + size_) T(std::move(data_[size_ - 1]));
+                // перемещаем нужные элементы вправо на 1
+                std::move_backward(data_.GetAddress() + dst, data_.GetAddress() + size_ - 1, data_.GetAddress() + size_);
+                // вставляем элемент на свое место
+                data_[dst] = std::forward<T>(copy);
+            }
+            else {
+                new (data_.GetAddress() + size_) T(std::forward<Args>(args)...);
+            }
+        }
+        ++size_;
+        return iterator{data_.GetAddress() + dst};
+    }
+
+    iterator Insert(const_iterator pos, const T& value) {
+        return Emplace(pos, value);
+    }
+    
+    iterator Insert(const_iterator pos, T&& value) {
+        return Emplace(pos, std::forward<T>(value));
+    }
+
+    iterator Erase(const_iterator pos) noexcept(std::is_nothrow_move_assignable_v<T>) {
+        auto dst = std::distance(cbegin(), pos);
+        // удаляем элемент на этой позиции
+        std::destroy_at(data_.GetAddress() + dst);
+        // перемещаем элементы следующие за удаленным влево на 1
+        std::move(data_.GetAddress() + dst + 1, data_.GetAddress() + size_, data_.GetAddress() + dst);
+        --size_;
+        // возвращаем итератор на новый элемент удаленной позиции
+        return iterator{data_.GetAddress() + dst};
+    }
+
+    ~Vector() {
+        std::destroy_n(data_.GetAddress(), size_);
+    }
+    
     void Swap(Vector& other) noexcept {
         if(this != &other) {
             data_.Swap(other.data_);
             std::swap(size_, other.size_);
         }
-    }
-
-    ~Vector() {
-        std::destroy_n(data_.GetAddress(), size_);
     }
 
     void Resize(size_t new_size) {
