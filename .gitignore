@@ -33,6 +33,8 @@
 
 # build folder for cmake build
 build
+build-release
+build-debug
 
 #VS Code json settings
 Active Code/.vscode
