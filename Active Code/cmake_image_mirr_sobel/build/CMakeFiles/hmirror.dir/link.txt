@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/hmirror.dir/src/hmirr.cpp.o CMakeFiles/hmirror.dir/src/img_lib.cpp.o CMakeFiles/hmirror.dir/src/ppm_image.cpp.o -o hmirror 

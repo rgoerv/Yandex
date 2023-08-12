@@ -1,3 +1,0 @@
-/home/rgoerv/Programs/Yandex/Active Code/cmake_image/build/CMakeFiles/negate.dir
-/home/rgoerv/Programs/Yandex/Active Code/cmake_image/build/CMakeFiles/edit_cache.dir
-/home/rgoerv/Programs/Yandex/Active Code/cmake_image/build/CMakeFiles/rebuild_cache.dir

@@ -13,7 +13,9 @@ void HMirrInplace(img_lib::Image& image){
 
     for(auto y = 0; y < h; ++y) {
         for(auto x = 0; x < mid; ++x) {
-            img_lib::swap(image.GetPixel(x, y), image.GetPixel(w - x - 1, y));
+            swap(image.GetPixel(x, y).r, image.GetPixel(w - x - 1, y).r);
+            swap(image.GetPixel(x, y).g, image.GetPixel(w - x - 1, y).g);
+            swap(image.GetPixel(x, y).b, image.GetPixel(w - x - 1, y).b);
         }
     }
 }

@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/sobel.dir/src/sobel.cpp.o CMakeFiles/sobel.dir/src/img_lib.cpp.o CMakeFiles/sobel.dir/src/ppm_image.cpp.o -o sobel 

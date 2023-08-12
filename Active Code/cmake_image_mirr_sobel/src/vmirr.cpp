@@ -10,10 +10,14 @@ void VMirrInplace(img_lib::Image& image) {
 
     auto h = image.GetHeight();
     auto w = image.GetWidth();
-    auto mid = (h / 2) % 2 == 0 ? h / 2 : (h / 2) - 1;
+    auto mid = h / 2;
 
     for(auto y = 0; y < mid; ++y) {
-        std::swap_ranges(image.GetLine(y), image.GetLine(y) + w, image.GetLine(h - y - 1));
+        for(auto x = 0; x < w; ++x) {
+            swap(image.GetPixel(x, y).r, image.GetPixel(x, h - y - 1).r);
+            swap(image.GetPixel(x, y).g, image.GetPixel(x, h - y - 1).g);
+            swap(image.GetPixel(x, y).b, image.GetPixel(x, h - y - 1).b);
+        }
     }
 }
 

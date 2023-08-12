@@ -32,10 +32,4 @@ int Image::GetStep() const {
     return step_;
 }
 
-void swap(img_lib::Color& lhs, img_lib::Color& rhs) {
-    std::swap(lhs.r, rhs.r);
-    std::swap(lhs.g, rhs.g);
-    std::swap(lhs.b, rhs.b);
-}
-
 }  // namespace img_lib

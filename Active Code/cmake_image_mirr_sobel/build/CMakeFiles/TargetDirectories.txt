@@ -1,5 +1,0 @@
-/home/rgoerv/Programs/Yandex/Active Code/cmake_image_mirr_sobel/build/CMakeFiles/vmirror.dir
-/home/rgoerv/Programs/Yandex/Active Code/cmake_image_mirr_sobel/build/CMakeFiles/hmirror.dir
-/home/rgoerv/Programs/Yandex/Active Code/cmake_image_mirr_sobel/build/CMakeFiles/sobel.dir
-/home/rgoerv/Programs/Yandex/Active Code/cmake_image_mirr_sobel/build/CMakeFiles/edit_cache.dir
-/home/rgoerv/Programs/Yandex/Active Code/cmake_image_mirr_sobel/build/CMakeFiles/rebuild_cache.dir

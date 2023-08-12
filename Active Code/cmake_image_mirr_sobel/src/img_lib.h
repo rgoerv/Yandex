@@ -66,6 +66,4 @@ private:
     std::vector<Color> pixels_;
 };
 
-void swap(img_lib::Color& lhs, img_lib::Color& rhs);
-
 }  // namespace img_lib
