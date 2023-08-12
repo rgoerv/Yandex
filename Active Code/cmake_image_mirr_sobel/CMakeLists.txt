@@ -14,7 +14,8 @@ else()
 endif()
 
 set(SOURCE_DIR src)
-set(IMGLIB_FILES "${SOURCE_DIR}/img_lib.h" "${SOURCE_DIR}/img_lib.cpp" "${SOURCE_DIR}/ppm_image.h" "${SOURCE_DIR}/ppm_image.cpp")
+set(IMGLIB_MAIN_FILES "${SOURCE_DIR}/img_lib.h" "${SOURCE_DIR}/img_lib.cpp")
+set(IMGLIB_FORMAT_FILES "${SOURCE_DIR}/ppm_image.h" "${SOURCE_DIR}/ppm_image.cpp")
 
 set(FILE_MAIN "${SOURCE_DIR}/vmirr.cpp")
 set(TARGET_NAME vmirror)
