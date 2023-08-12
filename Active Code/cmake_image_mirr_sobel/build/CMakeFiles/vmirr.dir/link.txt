@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/vmirr.dir/src/vmirr.cpp.o CMakeFiles/vmirr.dir/src/img_lib.cpp.o CMakeFiles/vmirr.dir/src/ppm_image.cpp.o -o vmirr 
