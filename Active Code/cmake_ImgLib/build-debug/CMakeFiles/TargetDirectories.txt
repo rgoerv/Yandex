@@ -1,3 +1,0 @@
-/home/rgoerv/Programs/Yandex/Active Code/cmake_ImgLib/build-debug/CMakeFiles/ImgLib.dir
-/home/rgoerv/Programs/Yandex/Active Code/cmake_ImgLib/build-debug/CMakeFiles/edit_cache.dir
-/home/rgoerv/Programs/Yandex/Active Code/cmake_ImgLib/build-debug/CMakeFiles/rebuild_cache.dir
