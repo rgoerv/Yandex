@@ -1,0 +1,11 @@
+prefix=/home/rgoerv/Programs/Yandex/Active Code/protobuild
+exec_prefix=/home/rgoerv/Programs/Yandex/Active Code/protobuild
+libdir=/home/rgoerv/Programs/Yandex/Active Code/protobuild/lib
+includedir=/home/rgoerv/Programs/Yandex/Active Code/protobuild/include
+
+Name: Protocol Buffers
+Description: Google's Data Interchange Format
+Version: 3.21.12.0
+Libs: -L${libdir} -lprotobuf-lite 
+Cflags: -I${includedir}
+Conflicts: protobuf

@@ -1,0 +1,29 @@
+syntax="proto3";
+
+package proto_tr;
+
+import "graph.proto";
+
+message RoutingSettings {
+    double bus_wait_time = 1;
+    double bus_velocity = 2;
+}
+
+message Stop_VertexId {
+    uint32 stop_id = 1;
+    uint64 vertex_id = 2;
+}
+
+message Edge_BusSpan {
+    uint32 vertex_from = 1;
+    uint32 vetex_to = 2;
+    string bus_name = 3;
+    uint32 span_count = 4;
+}
+
+message TransportRouter {
+    RoutingSettings routing_setting = 1;
+    repeated proto_graph.Edge graph = 2;
+    repeated Stop_VertexId stop_vertex = 3;
+    repeated Edge_BusSpan edge_bus_span = 4;
+}

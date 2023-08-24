@@ -33,7 +33,7 @@ bool SavePPM(const Path& file, const Image& image) {
     return out.good();
 }
 
-Image LoadPPM(const Path& file) {
+    Image LoadPPM(const Path& file) {
     // открываем поток с флагом ios::binary
     // поскольку будем читать данные в двоичном формате
     ifstream ifs(file, ios::binary);

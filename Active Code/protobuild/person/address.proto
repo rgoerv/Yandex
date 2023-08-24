@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package person;
+
+message Address {
+    string street = 1;
+    uint32 building = 2;
+}

@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package transport_catalogue_serialization;
+
+message RoutingSettings {
+    string settings_json = 1;
+}
+
+message RenderSettings {
+    string setting_json = 1;
+}
+
+message Stop {
+    uint32 id = 1;
+    string name = 2;
+    double lat = 3;
+    double lng = 4;
+}
+
+message Bus {
+    string name = 1;
+    repeated uint32 route = 2;
+    uint32 unique_size = 3;
+    int64 length_ = 4;
+    double geo_length = 5;
+    bool is_roundtrip = 6;
+    uint32 last_stop = 7;
+}
+
+message PairStops {
+    uint32 first_id = 1;
+    uint32 second_id = 2;
+}
+
+message Distance {
+    PairStops pair_stops = 1;
+    int64 distance = 2; 
+}
+
+message TransportCatalogue {
+    repeated Bus buses = 1;
+    repeated Stop stops = 2;
+    repeated Distance distances = 3;
+}
